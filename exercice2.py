@@ -29,3 +29,15 @@ class Cuisinier(Personne):
 
     def cuisiner(self):
         print("Cuisinier viens de cuisinier")
+
+
+
+
+def longueur(text):
+    return(len(text))
+l = longueur
+
+str.__add__(l)
+
+
+print(str.longueur)
