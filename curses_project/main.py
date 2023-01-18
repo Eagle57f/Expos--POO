@@ -32,12 +32,27 @@ def main(stdscr):
     win.addstr(6,0, "jsj")
     win.addstr(8,0, "feffe")
     
-    def attack():
-        stdscr.addstr(2, 1, "Vous avez attaqué!")
-    
+    def setup_input():
+        inp = curses.newwin(8,55, 5,5)
+        inp.addstr(1,1, "Please enter your username:")
+        sub = inp.subwin(3, 41, 7, 6)
+        sub.border()
+        sub2 = sub.subwin(1, 40, 8, 7)
+        tb = Textbox(sub2)
+        inp.refresh()
+        sub2.refresh()
+        tb.edit()
+        output = tb.gather()
+        inp.clear()
+        print(output)
+        stdscr.addstr(2,2, f"{output} aaaaaaaaaaaaaaaaaaaaa")
+        sub.refresh()
+        inp.refresh()
+        stdscr.refresh()
+        
     
     options = [
-        ((2,0,"Attaquer"), attack),
+        ((2,0,"Attaquer"), setup_input),
         ((4,0, "Plus"),),
         ((6,0, "jsj"),),
         ((8,0, "grehgeheh"),),
@@ -55,17 +70,22 @@ def main(stdscr):
                 win.addstr(options[option_index][0][0], options[option_index][0][1], options[option_index][0][2])
         win.refresh()
     
+
+
+
+
     win.refresh()
+    stdscr.refresh()
     
     while True:
         key = stdscr.getch()
         
-        if key == 450:
+        if key in (450, 259) :
             if option_target > 0:
                 option_target -= 1
             options_display(option_target)
             
-        elif key == 456:
+        elif key in (456, 258):
             if option_target < len(options)-1:
                 option_target += 1
             options_display(option_target)
@@ -86,14 +106,7 @@ def main(stdscr):
 
         win.refresh()
     
-    
-    
 
-
-    # box = Textbox(win)
-    # box.edit()
-    # text = box.gather().strip().replace("\n", "")
-    # stdscr.addstr(10, 40, text)
 
 
 
