@@ -1,3 +1,6 @@
+# https://docs.python.org/3/library/curses.html
+
+
 import curses
 from curses import wrapper
 from curses.textpad import Textbox, rectangle
@@ -14,52 +17,52 @@ def main(stdscr):
     stdscr.attron(BLUE_AND_BLACK)
     stdscr.border()
     stdscr.attroff(BLUE_AND_BLACK)
-    
-    # Ajoute le rectangle intérieur droit
-    stdscr.attron(BLUE_AND_BLACK)
-    rectangle(stdscr, 1, curses.COLS//2, curses.LINES - 2, curses.COLS - 3)
-    stdscr.attroff(BLUE_AND_BLACK)
-    
 
-    # Ajoute la zone intérieure droite
-    win = curses.newwin(curses.LINES - 4, curses.COLS//2-3, 2, curses.COLS//2+1)
-    stdscr.refresh()
-    
-    win.clear()
-    win.addstr(0,0,"Quelle action veut tu executer?")
-    win.addstr(2,0,"Attaquer", curses.A_REVERSE)
-    win.addstr(4,0, "Plus")
-    win.addstr(6,0, "jsj")
-    win.addstr(8,0, "feffe")
-    
-    def setup_input():
-        inp = curses.newwin(8,55, 5,5)
-        inp.addstr(1,1, "Please enter your username:")
-        sub = inp.subwin(3, 41, 7, 6)
-        sub.border()
-        sub2 = sub.subwin(1, 40, 8, 7)
-        tb = Textbox(sub2)
-        inp.refresh()
-        sub2.refresh()
-        tb.edit()
-        output = tb.gather()
-        inp.clear()
-        print(output)
-        stdscr.addstr(2,2, f"{output} aaaaaaaaaaaaaaaaaaaaa")
-        sub.refresh()
-        inp.refresh()
-        stdscr.refresh()
+
+
+    def setup_input(x = 3, y = 3, cols = 20, lines = 1, text = "Please enter your username:"):
+        '''
+        x (int): x position of top left corner of text_input box. Minimum value: 3
+        y (int): y position of top left corner of text_input box. Minimum value: 3
+        cols (int): length of text_input box
+        lines (int): height of text_input box
+        text (str): text to be displayed over the text_input box
+        '''
+        longest_line_length = 0
+        for line in text.split('\n'):
+            if len(line) > longest_line_length:
+                longest_line_length = len(line)
         
-    
+        if cols + 3 >= longest_line_length:
+            input_window_cols = cols + 3
+        else:
+            input_window_cols = len(longest_line_length)
+        
+        text_lines = len(text.split('\n')) - 1
+        
+        input_window = curses.newwin(lines + 4 + text_lines, input_window_cols, y - 2, x - 1) # Fenetre text_input
+        input_window.addstr(0, 0, text)
+        input = curses.newwin(lines, cols, y + text_lines, x)
+        tb = Textbox(input)
+        rectangle(input_window, 1 + text_lines, 0, lines + 2 + text_lines, cols + 1)
+        input_window.refresh()
+        input.refresh()
+        tb.edit()
+        output = tb.gather().strip().replace("\n", "")[:-1]
+        stdscr.addstr(2, 1, f"{output}")
+        input_window.clear()
+        input_window.refresh()
+        stdscr.refresh()
+
     options = [
-        ((2,0,"Attaquer"), setup_input),
+        ((2,0,"Ajouter un soldat"), lambda: setup_input(curses.COLS - 36, 4, 20, 1, "Nom du soldat:\n\n(exit pour annuler)\nuuuuuuuuuuuu\nttttt")),
         ((4,0, "Plus"),),
         ((6,0, "jsj"),),
         ((8,0, "grehgeheh"),),
     ]
     option_target = 0
     
-    def options_display(option_target):
+    def options_display(option_target = 0):
         for option_index in range(len(options)):
             win.addstr(10,0, str(option_index))
             win.addstr(11,0, str(option_target))
@@ -69,14 +72,36 @@ def main(stdscr):
             else:
                 win.addstr(options[option_index][0][0], options[option_index][0][1], options[option_index][0][2])
         win.refresh()
+
+
+
+    # Ajoute le rectangle intérieur droit
+    stdscr.attron(BLUE_AND_BLACK)
+    rectangle(stdscr, 1, curses.COLS//2, curses.LINES - 2, curses.COLS - 3)
+    stdscr.attroff(BLUE_AND_BLACK)
     
 
 
 
-
-    win.refresh()
+    # Ajoute la zone intérieure droite
+    win = curses.newwin(curses.LINES - 4, curses.COLS//2-3, 2, curses.COLS//2+1)
     stdscr.refresh()
-    
+    win.clear()
+    win.addstr(0,0,"Quelle action veut tu executer?")
+    options_display()
+    win.refresh()
+
+    # Ajoute la fenetre d affiche d entrée
+    key_input_window = curses.newwin(3, 6, curses.LINES-4, 2)
+    key_input_window.attron(BLUE_AND_BLACK)
+    key_input_window.border()
+    key_input_window.attroff(BLUE_AND_BLACK)
+    key_input_window.refresh()
+
+
+
+
+
     while True:
         key = stdscr.getch()
         
@@ -100,11 +125,12 @@ def main(stdscr):
             stdscr.addstr(1, 1, f"Vous avez selectionné l'action {option_target}")
             options[option_target][1]()
             stdscr.refresh()
-            
-        else:
-            stdscr.addstr(1, 1, str(key))
+        print(curses.LINES)
+        
 
-        win.refresh()
+        key_input_window.addstr(1, 1, str(key))
+        key_input_window.refresh()
+
     
 
 
